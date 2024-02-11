@@ -148,26 +148,27 @@ def get_tags(mp3_path: Path) -> list[Mp3Info]:
     return tags
 
 
+def setup_logging(log_file: Path) -> None:
+    """Set up logging to a file.
+    Using logging.basicConfig() will not add a handler when one is already
+    present. That is a problem if wanting to test log file functionality,
+    as pytest has already added its own handlers.
+    This function will add a handler to the root logger.
+    """
+    if not log_file:
+        return
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    fh = logging.FileHandler(log_file)
+    fmt = logging.Formatter("%(asctime)s %(message)s")
+    fh.setFormatter(fmt)
+    logger.addHandler(fh)
+
+
 def main(arglist=None):
     mp3_path, out_file, log_file = get_options(arglist)
 
-    if log_file:
-        # Set force=True to overwrite any existing handlers. Whthout this,
-        # the handlers added by pytest will prevent the log file from
-        # being created.
-        # TODO: See if adding a handler to the root logger instead of using
-        # basicConfig will work with what pytest does.
-        logging.basicConfig(
-            filename=str(log_file),
-            filemode="a",
-            level=logging.INFO,
-            format="%(asctime)s %(message)s",
-            force=True,
-        )
-
-    # logr = logging.getLogger()
-    # for h in logr.handlers:
-    #     print(h)
+    setup_logging(log_file)
 
     logging.info("BEGIN")
 
