@@ -9,7 +9,7 @@ import eyed3
 import pytest
 from pydub import AudioSegment
 
-from mp3_tag_lister import get_options, main
+from mp3_tag_lister import LOG_FILE_NAME, get_options, main
 
 
 def skipif_ffmpeg_not_installed():
@@ -53,10 +53,14 @@ def test_mp3_tag_lister_help(capsys):
 
 @skipif_ffmpeg_not_installed()
 def test_mp3_tag_lister(temp_mp3file: tuple[Path, Path]):
-    dir_path, mp3_file = temp_mp3file
-    args = [str(dir_path), "-o", "mp3_tags.csv", "--output-dir", str(dir_path)]
+    scan_path, mp3_file = temp_mp3file
+
+    log_file = mp3_file.parent / LOG_FILE_NAME
+
+    args = [str(scan_path), "-o", "mp3_tags.csv", "--output-dir", str(scan_path)]
     main(args)
-    csv_file = dir_path / "mp3_tags.csv"
+
+    csv_file = scan_path / "mp3_tags.csv"
     assert csv_file.exists()
     with csv_file.open() as file:
         lines = file.readlines()
@@ -69,6 +73,7 @@ def test_mp3_tag_lister(temp_mp3file: tuple[Path, Path]):
     # Check the data line.
     assert lines[1].startswith(f'"{mp3_file}","{mp3_file.name}","2024-01-23 04:56:00",')
     assert '"Tests","Tester","Feeling Testy","1","2023"' in lines[1]
+    assert log_file.exists()
 
 
 def test_mp3_tag_lister_bad_output_dir(tmp_path: Path, capsys):

@@ -150,13 +150,24 @@ def get_tags(mp3_path: Path) -> list[Mp3Info]:
 
 def main(arglist=None):
     mp3_path, out_file, log_file = get_options(arglist)
+
     if log_file:
+        # Set force=True to overwrite any existing handlers. Whthout this,
+        # the handlers added by pytest will prevent the log file from
+        # being created.
+        # TODO: See if adding a handler to the root logger instead of using
+        # basicConfig will work with what pytest does.
         logging.basicConfig(
             filename=str(log_file),
             filemode="a",
             level=logging.INFO,
             format="%(asctime)s %(message)s",
+            force=True,
         )
+
+    # logr = logging.getLogger()
+    # for h in logr.handlers:
+    #     print(h)
 
     logging.info("BEGIN")
 
