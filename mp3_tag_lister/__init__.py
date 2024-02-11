@@ -116,7 +116,7 @@ def get_tags(mp3_path: Path) -> list[Mp3Info]:
             FileName=file.name,
             FileModified=datetime.fromtimestamp(file.stat().st_mtime).strftime(
                 "%Y-%m-%d %H:%M:%S"
-            )
+            ),
         )
 
         try:
