@@ -142,6 +142,12 @@ def fit_str(text: str, fit_len: int = 70) -> str:
     return f"...{text[- (fit_len - 3):]}"
 
 
+def prep(value: str) -> str:
+    if not isinstance(value, str):
+        return value
+    return value.replace('"', "'")
+
+
 def get_tags(mp3_path: Path) -> list[Mp3Info]:
     files = sorted(mp3_path.glob("**/*.mp3"))
     tags = []
@@ -168,22 +174,26 @@ def get_tags(mp3_path: Path) -> list[Mp3Info]:
             elif mp3.tag is None:
                 info.error = "No tag info"
             else:
-                info.Album = mp3.tag.album if mp3.tag.album else ""
-                info.Artist = mp3.tag.artist if mp3.tag.artist else ""
-                info.Title = mp3.tag.title if mp3.tag.title else ""
-                info.Track = mp3.tag.track_num[0] if mp3.tag.track_num[0] else ""
+                info.Album = prep(mp3.tag.album) if mp3.tag.album else ""
+                info.Artist = prep(mp3.tag.artist) if mp3.tag.artist else ""
+                info.Title = prep(mp3.tag.title) if mp3.tag.title else ""
+                info.Track = prep(mp3.tag.track_num[0]) if mp3.tag.track_num[0] else ""
                 bd = mp3.tag.getBestDate()
                 if bd:
                     info.Year = bd.year
                 info.TDAT = (
-                    mp3.tag.getTextFrame("TDAT") if mp3.tag.getTextFrame("TDAT") else ""
+                    prep(mp3.tag.getTextFrame("TDAT"))
+                    if mp3.tag.getTextFrame("TDAT")
+                    else ""
                 )
                 info.TIT3 = (
-                    mp3.tag.getTextFrame("TIT3") if mp3.tag.getTextFrame("TIT3") else ""
+                    prep(mp3.tag.getTextFrame("TIT3"))
+                    if mp3.tag.getTextFrame("TIT3")
+                    else ""
                 )
 
         except Exception as e:
-            info.error = str(e)
+            info.error = prep(str(e))
 
         tags.append(info)
 
