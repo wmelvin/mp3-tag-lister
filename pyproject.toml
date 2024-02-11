@@ -11,10 +11,26 @@ requires-python = ">=3.8"
 # license = {file = "LICENSE"}
 keywords = [ "mp3", "id3", "tag", "csv"]
 
+authors = [
+  { name = "Bill Melvin", email = "bill@billmelvin.com" },
+]
+
 dependencies = [ "eyed3" ]
+
+[tool.setuptools.dynamic]
+version = {attr = "mp3_tag_lister.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mp3_tag_lister*"]
+exclude = ["test*"]
+namespaces = false
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+
+[project.scripts]
+mp3_tag_lister = "mp3_tag_lister:main"
 
 [tool.ruff]
 line-length = 88

@@ -102,6 +102,6 @@ def test_mp3_tag_lister_output_dir_overrides_output_file_dir(tmp_path: Path):
     out_dir2.mkdir()
     out_file = out_dir1 / "mp3_tags.csv"
     args = [str(tmp_path), "-o", str(out_file), "--output-dir", str(out_dir2)]
-    mp3_path, out_file = get_options(args)
+    mp3_path, out_file, _ = get_options(args)
     assert str(mp3_path) == str(tmp_path)
     assert str(out_file) == str(out_dir2 / "mp3_tags.csv")
