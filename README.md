@@ -9,6 +9,7 @@ The [eyed3](https://pypi.org/project/eyed3/) library is used to read the ID3 tag
 
 ```
 usage: mp3_tag_lister [-h] [-o OUTPUT_FILE] [--output-dir OUTPUT_DIR] [-y]
+                   [--no-log]
                    scan_dir
 
 Command-line utility to write specific ID3 tags to a CSV output.
@@ -26,6 +27,7 @@ options:
                         Optional. Name of output folder. Default is current
                         folder.
   -y, --overwrite       Optional. Overwrite output file if it exists.
+  --no-log              Optional. Do not write a log file.
 ```
 
 ## Reference
