@@ -19,9 +19,17 @@ def skipif_ffmpeg_not_installed():
 
 
 @pytest.fixture(scope="module")
-def temp_mp3file(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, Path]:
+def temp_mp3file(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, Path, Path]:
+    """Create a temporary mp3 file with a tag and return the file path.
+
+    returns (scan_dir, mp3_file, out_dir)
+    """
     dir_path = tmp_path_factory.mktemp("test_mp3_tag_lister")
-    mp3_file = dir_path / "example.mp3"
+    scan_dir = dir_path / "mp3s_go_here"
+    scan_dir.mkdir()
+    out_dir = dir_path / "output"
+    out_dir.mkdir()
+    mp3_file = scan_dir / "example.mp3"
     file_dt = datetime.fromisoformat("2024-01-23T04:56")
     if not mp3_file.exists():
         # Create a 2 second silent audio segment
@@ -39,7 +47,7 @@ def temp_mp3file(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, Path]:
         assert mp3_file.exists()
         time_stamp = file_dt.timestamp()
         os.utime(mp3_file, (time_stamp, time_stamp))
-    return dir_path, mp3_file
+    return scan_dir, mp3_file, out_dir
 
 
 def test_mp3_tag_lister_help(capsys):
@@ -52,27 +60,33 @@ def test_mp3_tag_lister_help(capsys):
 
 
 @skipif_ffmpeg_not_installed()
-def test_mp3_tag_lister(temp_mp3file: tuple[Path, Path]):
-    scan_path, mp3_file = temp_mp3file
+def test_mp3_tag_lister(temp_mp3file: tuple[Path, Path, Path]):
+    scan_path, mp3_file, out_dir = temp_mp3file
 
-    log_file = mp3_file.parent / LOG_FILE_NAME
+    log_file = out_dir / LOG_FILE_NAME
 
-    args = [str(scan_path), "-o", "mp3_tags.csv", "--output-dir", str(scan_path)]
+    args = [str(scan_path), "-o", "mp3_tags.csv", "--output-dir", str(out_dir)]
     main(args)
 
-    csv_file = scan_path / "mp3_tags.csv"
+    csv_file = out_dir / "mp3_tags.csv"
     assert csv_file.exists()
+
     with csv_file.open() as file:
         lines = file.readlines()
+
     assert len(lines) == 2
+
     # Check the header line.
     assert lines[0].strip() == (
         "FullName,FileName,FileModified,"
         "Album,Artist,Title,Track,Year,TDAT,TIT3,error"
     )
+
     # Check the data line.
     assert lines[1].startswith(f'"{mp3_file}","{mp3_file.name}","2024-01-23 04:56:00",')
     assert '"Tests","Tester","Feeling Testy","1","2023"' in lines[1]
+
+    # Check the log file was created.
     assert log_file.exists()
 
 
@@ -110,3 +124,26 @@ def test_mp3_tag_lister_output_dir_overrides_output_file_dir(tmp_path: Path):
     mp3_path, out_file, _ = get_options(args)
     assert str(mp3_path) == str(tmp_path)
     assert str(out_file) == str(out_dir2 / "mp3_tags.csv")
+
+
+@skipif_ffmpeg_not_installed()
+def test_mp3_tag_lister_no_log_option(temp_mp3file: tuple[Path, Path, Path]):
+    scan_path, mp3_file, out_dir = temp_mp3file
+
+    log_file = out_dir / LOG_FILE_NAME
+
+    args = [
+        str(scan_path),
+        "-o",
+        "mp3_tags.csv",
+        "--output-dir",
+        str(out_dir),
+        "--no-log",
+    ]
+    main(args)
+
+    csv_file = out_dir / "mp3_tags.csv"
+    assert csv_file.exists()
+
+    # Check the log file was not created.
+    assert not log_file.exists()
