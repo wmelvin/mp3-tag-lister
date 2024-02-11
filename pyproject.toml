@@ -8,14 +8,14 @@ dynamic = ["version"]
 description = 'Command-line utility to write specific ID3 tags to a CSV output.'
 readme = "README.md"
 requires-python = ">=3.8"
-# license = {file = "LICENSE"}
+license = {file = "LICENSE"}
 keywords = [ "mp3", "id3", "tag", "csv"]
 
 authors = [
   { name = "Bill Melvin", email = "bill@billmelvin.com" },
 ]
 
-dependencies = [ "eyed3" ]
+dependencies = [ "eyed3", "rich" ]
 
 [tool.setuptools.dynamic]
 version = {attr = "mp3_tag_lister.__version__"}
