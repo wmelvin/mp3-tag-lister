@@ -9,6 +9,8 @@ from pathlib import Path
 
 import eyed3
 
+LOG_FILE_NAME = "mp3_tag_lister.log"
+
 __version__ = "2024.02.1.dev0"
 
 app_title = f"mp3-tag-lister (v{__version__})"
@@ -99,7 +101,9 @@ def get_options(arglist=None):
     else:
         out_file = Path(f"mp3-tags-{run_dt.strftime('%Y%m%d_%H%M%S')}.csv")
 
-    return mp3_path, out_file
+    log_file = out_dir / LOG_FILE_NAME if out_dir else Path(LOG_FILE_NAME)
+
+    return mp3_path, out_file, log_file
 
 
 def get_tags(mp3_path: Path) -> list[Mp3Info]:
@@ -107,11 +111,12 @@ def get_tags(mp3_path: Path) -> list[Mp3Info]:
     tags = []
     for file in files:
         logging.info(f"FILE: {file}")
-        info = Mp3Info
-        info.FullName = str(file)
-        info.FileName = file.name
-        info.FileModified = datetime.fromtimestamp(file.stat().st_mtime).strftime(
-            "%Y-%m-%d %H:%M:%S"
+        info = Mp3Info(
+            FullName=str(file),
+            FileName=file.name,
+            FileModified=datetime.fromtimestamp(file.stat().st_mtime).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
         )
 
         try:
@@ -144,15 +149,16 @@ def get_tags(mp3_path: Path) -> list[Mp3Info]:
 
 
 def main(arglist=None):
-    logging.basicConfig(
-        filename="mp3_tag_lister.log",
-        filemode="a",
-        level=logging.INFO,
-        format="%(asctime)s %(message)s",
-    )
-    logging.info("BEGIN")
+    mp3_path, out_file, log_file = get_options(arglist)
+    if log_file:
+        logging.basicConfig(
+            filename=str(log_file),
+            filemode="a",
+            level=logging.INFO,
+            format="%(asctime)s %(message)s",
+        )
 
-    mp3_path, out_file = get_options(arglist)
+    logging.info("BEGIN")
 
     if out_file:
         print(f"\n{app_title}\n")
