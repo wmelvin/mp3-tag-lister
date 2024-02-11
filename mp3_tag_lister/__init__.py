@@ -12,7 +12,7 @@ from rich.console import Console
 
 LOG_FILE_NAME = "mp3_tag_lister.log"
 
-__version__ = "2024.02.1.dev1"
+__version__ = "2024.02.1.dev2"
 
 app_title = f"mp3-tag-lister (v{__version__})"
 

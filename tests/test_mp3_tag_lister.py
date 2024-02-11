@@ -4,6 +4,7 @@ import os
 import shutil
 from datetime import datetime
 from pathlib import Path
+from re import match
 
 import eyed3
 import pytest
@@ -147,6 +148,25 @@ def test_mp3_tag_lister_no_log_option(temp_mp3file: tuple[Path, Path, Path]):
 
     # Check the log file was not created.
     assert not log_file.exists()
+
+
+@skipif_ffmpeg_not_installed()
+def test_mp3_tag_lister_add_date_time_option(temp_mp3file: tuple[Path, Path, Path]):
+    scan_path, mp3_file, out_dir = temp_mp3file
+    args = [
+        str(scan_path),
+        "-o",
+        "mp3_tags.csv",
+        "--output-dir",
+        str(out_dir),
+        "--dt",
+    ]
+    main(args)
+
+    files = list(out_dir.glob("mp3-tags-*.csv"))
+    assert len(files) == 1
+    csv_file = files[0]
+    assert match(csv_file.name, r"mp3-tags-\d{8}_\d{6}.csv")
 
 
 def test_fit_str_exact_length():
