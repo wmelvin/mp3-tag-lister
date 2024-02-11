@@ -159,14 +159,15 @@ def test_mp3_tag_lister_add_date_time_option(temp_mp3file: tuple[Path, Path, Pat
         "mp3_tags.csv",
         "--output-dir",
         str(out_dir),
+        "--no-log",
         "--dt",
     ]
     main(args)
 
-    files = list(out_dir.glob("mp3-tags-*.csv"))
+    files = list(out_dir.glob("mp3_tags-*.csv"))
     assert len(files) == 1
     csv_file = files[0]
-    assert match(csv_file.name, r"mp3-tags-\d{8}_\d{6}.csv")
+    assert match(r"mp3_tags-\d{8}_\d{6}.csv", csv_file.name)
 
 
 def test_fit_str_exact_length():

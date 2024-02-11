@@ -79,6 +79,13 @@ def get_options(arglist=None):
         help="Optional. Do not write a log file.",
     )
 
+    ap.add_argument(
+        "--dt",
+        dest="do_tag",
+        action="store_true",
+        help="Optional. Add a date_time tag to the output file name.",
+    )
+
     args = ap.parse_args(arglist)
 
     mp3_path = Path(args.scan_dir)
@@ -103,6 +110,10 @@ def get_options(arglist=None):
                 f"\nERROR: Output folder '{out_file.parent}' does not exist.\n"
             )
             sys.exit(1)
+        if args.do_tag:
+            out_file = out_file.parent.joinpath(
+                f"{out_file.stem}-{run_dt.strftime('%Y%m%d_%H%M%S')}{out_file.suffix}"
+            )
         if out_file.exists() and not args.do_overwrite:
             sys.stderr.write(
                 f"\nERROR: Output file '{out_file}' exists. Use -y to overwrite.\n"
