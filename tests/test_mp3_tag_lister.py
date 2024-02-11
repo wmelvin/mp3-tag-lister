@@ -9,7 +9,7 @@ import eyed3
 import pytest
 from pydub import AudioSegment
 
-from mp3_tag_lister import LOG_FILE_NAME, get_options, main
+from mp3_tag_lister import LOG_FILE_NAME, fit_str, get_options, main
 
 
 def skipif_ffmpeg_not_installed():
@@ -147,3 +147,40 @@ def test_mp3_tag_lister_no_log_option(temp_mp3file: tuple[Path, Path, Path]):
 
     # Check the log file was not created.
     assert not log_file.exists()
+
+
+def test_fit_str_exact_length():
+    # Test with a string that is exactly the fit_len
+    text = "This is a test string."
+    result = fit_str(text, len(text))
+    assert result == "This is a test string."
+
+
+def test_fit_str_less_than_fit_len():
+    # Test with a string that is shorter than fit_len
+    text = "Short string"
+    result = fit_str(text, 20)
+    # expect right-padded with spaces
+    assert result == "Short string        "
+
+
+def test_fit_str_greater_than_fit_len():
+    # Test with a string that is longer than fit_len
+    text = "This is a string that is longer than fit_len."
+    result = fit_str(text, 20)
+    assert result == "...ger than fit_len."
+
+
+def test_fit_str_empty_string():
+    # Test with an empty string
+    text = ""
+    result = fit_str(text, 20)
+    # expect right-padded with spaces
+    assert result == "                    "
+
+
+def test_fit_str_negative_fit_len():
+    # Test with a negative fit_len
+    text = "This is a test string."
+    with pytest.raises(ValueError):
+        fit_str(text, -5)

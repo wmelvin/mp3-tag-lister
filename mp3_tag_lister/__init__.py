@@ -8,6 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 import eyed3
+from rich.console import Console
 
 LOG_FILE_NAME = "mp3_tag_lister.log"
 
@@ -16,6 +17,8 @@ __version__ = "2024.02.1.dev0"
 app_title = f"mp3-tag-lister (v{__version__})"
 
 run_dt = datetime.now()
+
+console = Console()
 
 
 @dataclass
@@ -116,10 +119,28 @@ def get_options(arglist=None):
     return mp3_path, out_file, log_file
 
 
+def fit_str(text: str, fit_len: int = 70) -> str:
+    """Fit text to exact length by either padding with spaces on the right
+    or trimming with ellipsis on the left"""
+    if fit_len < 0:
+        raise ValueError("fit_len must be a positive integer")
+    if len(text) == fit_len:
+        return text
+    if len(text) < fit_len:
+        return f"{text}{' ' * (fit_len - len(text))}"
+    return f"...{text[- (fit_len - 3):]}"
+
+
 def get_tags(mp3_path: Path) -> list[Mp3Info]:
     files = sorted(mp3_path.glob("**/*.mp3"))
     tags = []
     for file in files:
+        console.print(
+            f"File: {fit_str(str(file))}",
+            end="\r",
+            overflow="ellipsis",
+            style="magenta",
+        )
         logging.info(f"FILE: {file}")
         info = Mp3Info(
             FullName=str(file),
@@ -182,13 +203,12 @@ def main(arglist=None):
 
     logging.info("BEGIN")
 
-    if out_file:
-        print(f"\n{app_title}\n")
-        print(f"Scanning '{mp3_path}' for mp3 file(s).\n")
+    console.print(f"\n{app_title}\n")
+    console.print(f"Scanning '{mp3_path}' for mp3 file(s).\n")
 
     tags = get_tags(mp3_path)
 
-    print(f"Writing to '{out_file}'\n")
+    console.print(f"\n\nWriting to '{out_file}'\n")
 
     with out_file.open("w") as f:
         f.write(
