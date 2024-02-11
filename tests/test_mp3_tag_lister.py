@@ -18,7 +18,7 @@ def skipif_ffmpeg_not_installed():
     return pytest.mark.skipif(file is None, reason=err)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
 def temp_mp3file(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, Path, Path]:
     """Create a temporary mp3 file with a tag and return the file path.
 

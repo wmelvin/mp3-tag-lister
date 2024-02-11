@@ -69,6 +69,13 @@ def get_options(arglist=None):
         help="Optional. Overwrite output file if it exists.",
     )
 
+    ap.add_argument(
+        "--no-log",
+        dest="no_log",
+        action="store_true",
+        help="Optional. Do not write a log file.",
+    )
+
     args = ap.parse_args(arglist)
 
     mp3_path = Path(args.scan_dir)
@@ -101,7 +108,10 @@ def get_options(arglist=None):
     else:
         out_file = Path(f"mp3-tags-{run_dt.strftime('%Y%m%d_%H%M%S')}.csv")
 
-    log_file = out_dir / LOG_FILE_NAME if out_dir else Path(LOG_FILE_NAME)
+    if args.no_log:
+        log_file = None
+    else:
+        log_file = out_dir / LOG_FILE_NAME if out_dir else Path(LOG_FILE_NAME)
 
     return mp3_path, out_file, log_file
 
