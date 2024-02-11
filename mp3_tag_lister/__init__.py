@@ -18,17 +18,17 @@ run_dt = datetime.now()
 
 @dataclass
 class Mp3Info:
-    FullName: str
-    FileName: str
-    FileModified: str
-    Album: str
-    Artist: str
-    Title: str
-    Track: str
-    Year: str
-    TDAT: str
-    TIT3: str
-    error: str
+    FullName: str = ""
+    FileName: str = ""
+    FileModified: str = ""
+    Album: str = ""
+    Artist: str = ""
+    Title: str = ""
+    Track: str = ""
+    Year: str = ""
+    TDAT: str = ""
+    TIT3: str = ""
+    error: str = ""
 
 
 def get_options(arglist=None):
@@ -38,7 +38,7 @@ def get_options(arglist=None):
 
     ap.add_argument(
         "scan_dir",
-        help="Name of the folder to scan for mp3 file(s).",
+        help="Name of the folder (directory) to scan for mp3 file(s).",
     )
 
     ap.add_argument(
@@ -46,10 +46,17 @@ def get_options(arglist=None):
         "--output-file",
         dest="output_file",
         action="store",
-        help= (
+        help=(
             "Optional. Name of output file. Default output is "
             "mp3-tags-(date)_(time).csv."
         ),
+    )
+
+    ap.add_argument(
+        "--output-dir",
+        dest="output_dir",
+        action="store",
+        help="Optional. Name of output folder. Default is current folder.",
     )
 
     ap.add_argument(
@@ -64,13 +71,22 @@ def get_options(arglist=None):
 
     mp3_path = Path(args.scan_dir)
     if not mp3_path.exists():
-        sys.stderr.write(f"\nERROR: Cannot find '{args.mp3_file}'\n")
+        sys.stderr.write(f"\nERROR: Cannot find '{mp3_path}'\n")
         sys.exit(1)
+
+    out_dir = args.output_dir
+    if out_dir:
+        out_dir = Path(out_dir)
+        if not out_dir.exists():
+            sys.stderr.write(f"\nERROR: Output folder '{out_dir}' does not exist.\n")
+            sys.exit(1)
 
     out_file = args.output_file
     if out_file:
         out_file = Path(out_file)
-        if not out_file.parent.exists():
+        if out_dir:
+            out_file = out_dir / out_file.name
+        elif not out_file.parent.exists():
             sys.stderr.write(
                 f"\nERROR: Output folder '{out_file.parent}' does not exist.\n"
             )
@@ -86,7 +102,7 @@ def get_options(arglist=None):
     return mp3_path, out_file
 
 
-def get_tags(mp3_path: Path) -> list:
+def get_tags(mp3_path: Path) -> list[Mp3Info]:
     files = sorted(mp3_path.glob("**/*.mp3"))
     tags = []
     for file in files:
@@ -94,7 +110,9 @@ def get_tags(mp3_path: Path) -> list:
         info = Mp3Info
         info.FullName = str(file)
         info.FileName = file.name
-        info.FileModified = file.stat().st_mtime
+        info.FileModified = datetime.fromtimestamp(file.stat().st_mtime).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
 
         try:
             mp3 = eyed3.load(file)
@@ -107,7 +125,9 @@ def get_tags(mp3_path: Path) -> list:
                 info.Artist = mp3.tag.artist if mp3.tag.artist else ""
                 info.Title = mp3.tag.title if mp3.tag.title else ""
                 info.Track = mp3.tag.track_num[0] if mp3.tag.track_num[0] else ""
-                info.Year = mp3.tag.getBestDate() if mp3.tag.getBestDate() else ""
+                bd = mp3.tag.getBestDate()
+                if bd:
+                    info.Year = bd.year
                 info.TDAT = (
                     mp3.tag.getTextFrame("TDAT") if mp3.tag.getTextFrame("TDAT") else ""
                 )
