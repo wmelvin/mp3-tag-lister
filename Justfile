@@ -10,10 +10,10 @@
   pipenv run ruff format --check
 
 @clean:
-  rm dist/*
-  rmdir dist
-  rm mp3pic.egg-info/*
-  rmdir mp3pic.egg-info
+  -rm dist/*
+  -rmdir dist
+  -rm mp3_tag_lister.egg-info/*
+  -rmdir mp3_tag_lister.egg-info
 
 @format:
   echo 'Run ruff format'
