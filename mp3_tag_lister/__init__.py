@@ -12,7 +12,7 @@ from rich.console import Console
 
 LOG_FILE_NAME = "mp3_tag_lister.log"
 
-__version__ = "2024.02.1.dev2"
+__version__ = "2024.03.1"
 
 app_title = f"mp3-tag-lister (v{__version__})"
 
@@ -156,7 +156,7 @@ def get_tags(mp3_path: Path) -> list[Mp3Info]:
             f"File: {fit_str(str(file))}",
             end="\r",
             overflow="ellipsis",
-            style="magenta",
+            highlight=False,
         )
         logging.info(f"FILE: {file}")
         info = Mp3Info(
@@ -224,8 +224,8 @@ def main(arglist=None):
 
     logging.info("BEGIN")
 
-    console.print(f"\n{app_title}\n")
-    console.print(f"Scanning '{mp3_path}' for mp3 file(s).\n")
+    console.print(f"\n{app_title}\n", highlight=False, style="cyan")
+    console.print(f"Scanning '{mp3_path}'\n")
 
     tags = get_tags(mp3_path)
 
