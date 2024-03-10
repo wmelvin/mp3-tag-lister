@@ -12,7 +12,7 @@ from rich.console import Console
 
 LOG_FILE_NAME = "mp3_tag_lister.log"
 
-__version__ = "2024.03.1"
+__version__ = "2024.03.2"
 
 app_title = f"mp3-tag-lister (v{__version__})"
 
@@ -211,7 +211,7 @@ def setup_logging(log_file: Path) -> None:
         return
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
-    fh = logging.FileHandler(log_file)
+    fh = logging.FileHandler(log_file, encoding="utf-8")
     fmt = logging.Formatter("%(asctime)s %(message)s")
     fh.setFormatter(fmt)
     logger.addHandler(fh)
