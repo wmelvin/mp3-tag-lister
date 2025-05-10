@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import os
 import shutil
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from re import match
 
 import eyed3
 import pytest
-from pydub import AudioSegment
 
 from mp3_tag_lister import LOG_FILE_NAME, fit_str, get_options, main
 
@@ -33,9 +33,44 @@ def temp_mp3file(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, Path, 
     mp3_file = scan_dir / "example.mp3"
     file_dt = datetime.fromisoformat("2024-01-23T04:56")
     if not mp3_file.exists():
-        # Create a 2 second silent audio segment
-        audio = AudioSegment.silent(duration=2000)
-        audio.export(mp3_file, format="mp3")
+        # Create a 2 second silent audio file
+
+        ffmpeg = shutil.which("ffmpeg")
+        if ffmpeg is None:
+            return None
+
+        result = subprocess.run(  # noqa: S603
+            [
+                ffmpeg,
+                "-f",
+                "lavfi",
+                "-i",
+                "anullsrc=r=44100:cl=mono",
+                "-t",
+                "2",
+                "-q:a",
+                "9",
+                str(mp3_file),
+            ],
+            check=True,
+        )
+
+        #  -f lavfi: Use a lavfi input format
+        #  -i anullsrc=r=44100:cl=mono: Use the anullsrc audio source filter
+        #  -t 2: Set the duration to 2 seconds
+        #  -q:a 9: Set the audio quality to 9 (lower is better)
+        #
+        #  https://trac.ffmpeg.org/wiki/Null#anullsrc
+        #  https://ffmpeg.org/ffmpeg-filters.html#anullsrc
+        #  https://ffmpeg.org/ffmpeg-devices.html#lavfi
+
+        print(f"\nSTDERR:\n{result.stderr}")
+        print(f"\nSTDOUT:\n{result.stdout}")
+
+        assert result.returncode == 0
+
+        assert mp3_file.exists()
+
         audiofile = eyed3.load(mp3_file)
         if audiofile.tag is None:
             audiofile.initTag()
@@ -79,8 +114,7 @@ def test_mp3_tag_lister(temp_mp3file: tuple[Path, Path, Path]):
 
     # Check the header line.
     assert lines[0].strip() == (
-        "FullName,FileName,FileModified,"
-        "Album,Artist,Title,Track,Year,TDAT,TIT3,error"
+        "FullName,FileName,FileModified,Album,Artist,Title,Track,Year,TDAT,TIT3,error"
     )
 
     # Check the data line.

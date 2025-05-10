@@ -12,7 +12,7 @@ from rich.console import Console
 
 LOG_FILE_NAME = "mp3_tag_lister.log"
 
-__version__ = "2024.03.2"
+__version__ = "2025.05.1"
 
 app_title = f"mp3-tag-lister (v{__version__})"
 
@@ -139,7 +139,7 @@ def fit_str(text: str, fit_len: int = 70) -> str:
         return text
     if len(text) < fit_len:
         return f"{text}{' ' * (fit_len - len(text))}"
-    return f"...{text[- (fit_len - 3):]}"
+    return f"...{text[-(fit_len - 3) :]}"
 
 
 def prep(value: str) -> str:
