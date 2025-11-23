@@ -7,7 +7,7 @@ name = "mp3-tag-lister"
 dynamic = ["version"]
 description = 'Command-line utility to write specific ID3 tags to a CSV output.'
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = {file = "LICENSE"}
 keywords = [ "mp3", "id3", "tag", "csv"]
 

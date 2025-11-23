@@ -11,9 +11,7 @@
 
 @clean:
   -rm dist/*
-  -rmdir dist
   -rm mp3_tag_lister.egg-info/*
-  -rmdir mp3_tag_lister.egg-info
 
 @format:
   echo 'Run ruff format'
