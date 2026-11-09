@@ -7,8 +7,8 @@ name = "mp3-tag-lister"
 dynamic = ["version"]
 description = 'Command-line utility to write specific ID3 tags to a CSV output.'
 readme = "README.md"
-requires-python = ">=3.10"
-license = {file = "LICENSE"}
+requires-python = ">=3.11"
+license = "MIT"
 keywords = [ "mp3", "id3", "tag", "csv"]
 
 authors = [
@@ -16,8 +16,8 @@ authors = [
 ]
 
 dependencies = [
- "eyed3",
- "rich",
+    "eyed3>=0.9.9",
+    "rich>=15.0.0",
 ]
 
 [tool.setuptools.dynamic]
@@ -70,8 +70,7 @@ ignore = ["ISC001"]
 
 [dependency-groups]
 dev = [
-    "build>=1.2.2.post1",
-    # "pydub>=0.25.1",
-    "pytest>=8.3.5",
-    "ruff>=0.11.9",
+    "build>=1.6.1",
+    "pytest>=9.2.0",
+    "ruff>=0.17.4",
 ]
